@@ -1,0 +1,472 @@
+/* Estilos generales */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.6;
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.app-header h1 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+}
+
+.app-header p {
+  color: #7f8c8d;
+}
+
+/* Sección de carga de archivos */
+.upload-section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.file-selection {
+  margin-bottom: 1.5rem;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.file-button {
+  background-color: #3498db;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-block;
+  transition: background-color 0.3s;
+}
+
+.file-button:hover {
+  background-color: #2980b9;
+}
+
+.file-name {
+  flex: 1;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: 1px solid #ddd;
+}
+
+.upload-button {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.upload-button:hover:not(:disabled) {
+  background-color: #219653;
+}
+
+.upload-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
+
+/* Barra de progreso */
+.progress-container {
+  margin-top: 1.5rem;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 12px;
+  background-color: #ecf0f1;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #3498db;
+  transition: width 0.3s ease;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* Mensajes de error */
+.error-message {
+  background-color: #ffecec;
+  color: #e74c3c;
+  padding: 15px;
+  border-radius: 4px;
+  margin-top: 1rem;
+  border-left: 4px solid #e74c3c;
+}
+
+/* Contenedor de resultados */
+.results-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.results-container > section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.results-container h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+/* Información del video */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Video procesado */
+.video-section {
+  background-color: #f0f9ff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #3498db;
+  margin-top: 2rem;
+}
+
+.video-section h3 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.video-section p {
+  margin-bottom: 1rem;
+}
+
+.video-player-container {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background-color: #000;
+  margin-bottom: 1.5rem;
+}
+
+.video-player {
+  width: 100%;
+  display: block;
+  max-height: 600px;
+}
+
+.video-error {
+  padding: 2rem;
+  background-color: #f8d7da;
+  color: #721c24;
+  text-align: center;
+  border-radius: 4px;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.retry-button {
+  margin-top: 1rem;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.retry-button:hover {
+  background-color: #c82333;
+}
+
+.video-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.download-button {
+  display: inline-block;
+  background-color: #3498db;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.download-button:hover {
+  background-color: #2980b9;
+}
+
+.stat-card {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  text-align: center;
+  transition: transform 0.2s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.highlight-card {
+  background-color: #e3f2fd;
+  border-left: 4px solid #2196f3;
+}
+
+.stat-card h3 {
+  color: #7f8c8d;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card p {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+/* Vagones detectados */
+.cars-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.cars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.car-card {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.car-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.car-card.selected {
+  border-color: #3498db;
+  background-color: #f0f8ff;
+}
+
+.car-img-container {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  position: relative;
+}
+
+.car-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.car-card:hover .car-thumbnail {
+  transform: scale(1.05);
+}
+
+.car-info {
+  padding: 1rem;
+}
+
+.car-info h3 {
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+.car-text {
+  font-weight: 500;
+  color: #3498db;
+  margin-bottom: 0.5rem;
+}
+
+.car-confidence {
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.car-details {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  border: 1px solid #e1e1e1;
+}
+
+.car-details h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e1e1e1;
+}
+
+.car-detail-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.car-image-large {
+  flex: 0 0 300px;
+  max-width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.car-image-large img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.car-metadata {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.metadata-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  background-color: white;
+  border-radius: 4px;
+  border-left: 3px solid #3498db;
+}
+
+.metadata-item span {
+  color: #7f8c8d;
+}
+
+.metadata-item strong {
+  color: #2c3e50;
+}
+
+/* Frames de muestra */
+.frames-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.frame-card {
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.frame-card:hover {
+  transform: scale(1.02);
+}
+
+.frame-card img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .file-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .file-button, .upload-button {
+    width: 100%;
+    text-align: center;
+  }
+  
+  .car-detail-content {
+    flex-direction: column;
+  }
+  
+  .stats-grid, .frames-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .cars-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
