@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Visualización de Detección de Trenes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --text-color: #333;
+            --light-gray: #f4f4f4;
+            --border-color: #ddd;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-gray);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo i {
+            font-size: 2rem;
+            margin-right: 10px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .search-filters {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .data-container {
+            background-color: white;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .data-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .data-action {
+            display: flex;
+            gap: 10px;
+        }
+
+        .reports-container {
+            margin-bottom: 30px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .view-btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .view-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .badge-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .badge-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 1000px;
+            animation: modalFade 0.3s;
+        }
+        
+        /* Image Modal Styles */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            overflow: auto;
+            text-align: center;
+            padding-top: 50px;
+        }
+        
+        .image-modal-content {
+            max-width: 90%;
+            max-height: 80vh;
+            margin: auto;
+            display: block;
+            animation: modalFade 0.3s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .image-modal-close {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .image-modal-caption {
+            color: #f1f1f1;
+            font-size: 18px;
+            padding: 15px 0;
+            height: auto;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .modal-header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .close {
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .wagon-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .wagon-card {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .wagon-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .wagon-image:hover {
+            transform: scale(1.02);
+        }
+
+        .wagon-details {
+            padding: 15px;
+        }
+
+        .wagon-code {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .wagon-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .info-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #777;
+        }
+
+        .report-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .detail-card {
+            background-color: var(--light-gray);
+            padding: 15px;
+            border-radius: 5px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .detail-title {
+            font-size: 0.9rem;
+            color: #777;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 30px;
+            font-size: 1.2rem;
+            color: #777;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            font-size: 1.1rem;
+            color: #777;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+
+        .pagination-btn {
+            padding: 5px 10px;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .pagination-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination-btn:hover:not(.active) {
+            background-color: #f4f4f4;
+        }
+
+        .page-info {
+            text-align: center;
+            margin-top: 10px;
+            color: #777;
+        }
+
+        /* Error message */
+        .error-message {
+            background-color: #ffebee;
+            color: var(--danger-color);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        /* Animation */
+        @keyframes modalFade {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsiveness */
+        @media (max-width: 768px) {
+            .filter-group {
+                min-width: 100%;
+            }
+            
+            .btn-container {
+                justify-content: center;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <i class="fas fa-train"></i>
+            <h1>Sistema de Visualización de Detección de Trenes</h1>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="search-filters">
+            <div class="error-message" id="error-message"></div>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="date-from">Fecha desde</label>
+                    <input type="date" id="date-from">
+                </div>
+                <div class="filter-group">
+                    <label for="date-to">Fecha hasta</label>
+                    <input type="date" id="date-to">
+                </div>
+                <div class="filter-group">
+                    <label for="car-count">Cantidad de vagones</label>
+                    <select id="car-count">
+                        <option value="">Todos</option>
+                        <option value="1-3">1-3</option>
+                        <option value="4-6">4-6</option>
+                        <option value="7-10">7-10</option>
+                        <option value="10+">Más de 10</option>
+                    </select>
+                </div>
+            </div>
+            <div class="btn-container">
+                <button class="btn btn-primary" id="search-btn">
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+                <button class="btn btn-primary" id="reset-btn">
+                    <i class="fas fa-sync-alt"></i> Reiniciar
+                </button>
+            </div>
+        </div>
+
+        <div class="reports-container">
+            <div class="data-container">
+                <div class="data-header">
+                    <div class="data-title">Reportes de Detección</div>
+                    <div class="data-action">
+                        <button class="btn btn-primary" id="refresh-btn">
+                            <i class="fas fa-sync-alt"></i> Actualizar
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="reports-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha y Hora</th>
+                                <th>Vagones Detectados</th>
+                                <th>Tiempo de Procesamiento</th>
+                                <th>FPS</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reports-tbody">
+                            <!-- Los datos se cargarán dinámicamente aquí -->
+                        </tbody>
+                    </table>
+                    <div id="loading-reports" class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Cargando datos...
+                    </div>
+                    <div id="no-reports" class="no-data" style="display: none;">
+                        No se encontraron reportes que coincidan con los criterios de búsqueda.
+                    </div>
+                </div>
+                <div class="pagination" id="pagination">
+                    <!-- Paginación se generará dinámicamente -->
+                </div>
+                <div class="page-info" id="page-info"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para ver detalles del reporte -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Detalles del Reporte: <span id="report-id"></span></div>
+                <span class="close" id="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="report-details">
+                    <div class="detail-card">
+                        <div class="detail-title">Fecha y Hora</div>
+                        <div class="detail-value" id="report-timestamp"></div>
+                    </div>
+                    <div class="detail-card">
+                        <div class="detail-title">Vagones Detectados</div>
+                        <div class="detail-value" id="report-cars-count"></div>
+                    </div>
+                    <div class="detail-card">
+                        <div class="detail-title">Tiempo de Procesamiento</div>
+                        <div class="detail-value" id="report-processing-time"></div>
+                    </div>
+                    <div class="detail-card">
+                        <div class="detail-title">FPS</div>
+                        <div class="detail-value" id="report-fps"></div>
+                    </div>
+                </div>
+
+                <h3>Vagones Detectados</h3>
+                <div id="loading-wagons" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Cargando vagones...
+                </div>
+                <div id="no-wagons" class="no-data" style="display: none;">
+                    No se encontraron vagones para este reporte.
+                </div>
+                <div class="wagon-container" id="wagon-container">
+                    <!-- Los vagones se cargarán dinámicamente aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal para visualizar imágenes ampliadas -->
+    <div id="image-modal" class="image-modal">
+        <span class="image-modal-close" id="close-image-modal">&times;</span>
+        <img class="image-modal-content" id="enlarged-image">
+        <div class="image-modal-caption" id="image-caption"></div>
+    </div>
+
+    <script>
+        // Configuración
+        const API_URL = 'http://localhost:3000/api'; // Ajusta según tu configuración de backend
+        let currentPage = 1;
+        const pageSize = 10;
+        let totalPages = 0;
+        let reportData = [];
+
+        // Elementos DOM
+        const searchBtn = document.getElementById('search-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const dateFrom = document.getElementById('date-from');
+        const dateTo = document.getElementById('date-to');
+        const carCount = document.getElementById('car-count');
+        const reportsTable = document.getElementById('reports-table');
+        const reportsTbody = document.getElementById('reports-tbody');
+        const loadingReports = document.getElementById('loading-reports');
+        const noReports = document.getElementById('no-reports');
+        const pagination = document.getElementById('pagination');
+        const pageInfo = document.getElementById('page-info');
+        const reportModal = document.getElementById('report-modal');
+        const closeModal = document.getElementById('close-modal');
+        const reportId = document.getElementById('report-id');
+        const reportTimestamp = document.getElementById('report-timestamp');
+        const reportCarsCount = document.getElementById('report-cars-count');
+        const reportProcessingTime = document.getElementById('report-processing-time');
+        const reportFps = document.getElementById('report-fps');
+        const wagonContainer = document.getElementById('wagon-container');
+        const loadingWagons = document.getElementById('loading-wagons');
+        const noWagons = document.getElementById('no-wagons');
+        const errorMessage = document.getElementById('error-message');
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', fetchReports);
+        searchBtn.addEventListener('click', handleSearch);
+        resetBtn.addEventListener('click', resetFilters);
+        refreshBtn.addEventListener('click', fetchReports);
+        closeModal.addEventListener('click', () => reportModal.style.display = 'none');
+        
+        // Modal de imagen
+        const imageModal = document.getElementById('image-modal');
+        const enlargedImage = document.getElementById('enlarged-image');
+        const imageCaption = document.getElementById('image-caption');
+        const closeImageModal = document.getElementById('close-image-modal');
+        
+        closeImageModal.addEventListener('click', () => imageModal.style.display = 'none');
+        
+        window.addEventListener('click', (e) => {
+            if (e.target === reportModal) {
+                reportModal.style.display = 'none';
+            }
+            if (e.target === imageModal) {
+                imageModal.style.display = 'none';
+            }
+        });
+
+        // Funciones
+        function fetchReports() {
+            showLoading(true);
+            
+            const filters = getFilters();
+            const url = `${API_URL}/reports?page=${currentPage}&limit=${pageSize}${filters}`;
+            
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar los reportes');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    reportData = data.reports;
+                    totalPages = Math.ceil(data.total / pageSize);
+                    displayReports(data.reports);
+                    updatePagination();
+                    updatePageInfo(data.total);
+                })
+                .catch(error => {
+                    showError(error.message);
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    showLoading(false);
+                });
+        }
+
+        function getFilters() {
+            let filters = '';
+            
+            const fromDate = dateFrom.value;
+            const toDate = dateTo.value;
+            const carsCount = carCount.value;
+            
+            if (fromDate) {
+                filters += `&dateFrom=${fromDate}`;
+            }
+            
+            if (toDate) {
+                filters += `&dateTo=${toDate}`;
+            }
+            
+            if (carsCount) {
+                const [min, max] = carsCount.split('-');
+                if (min && max) {
+                    filters += `&minCars=${min}&maxCars=${max}`;
+                } else if (carsCount === '10+') {
+                    filters += '&minCars=10';
+                }
+            }
+            
+            return filters;
+        }
+
+        function displayReports(reports) {
+            reportsTbody.innerHTML = '';
+            
+            if (reports.length === 0) {
+                noReports.style.display = 'block';
+                reportsTable.style.display = 'none';
+                return;
+            }
+            
+            noReports.style.display = 'none';
+            reportsTable.style.display = 'table';
+            
+            reports.forEach(report => {
+                const row = document.createElement('tr');
+                
+                // Truncar el ID para mostrar solo los primeros 8 caracteres
+                const shortId = report.id.substring(0, 8) + '...';
+                
+                row.innerHTML = `
+                    <td title="${report.id}">${shortId}</td>
+                    <td>${formatDate(report.timestamp)}</td>
+                    <td>
+                        <span class="badge ${getBadgeClass(report.train_cars_count)}">
+                            ${report.train_cars_count}
+                        </span>
+                    </td>
+                    <td>${report.processing_time.toFixed(2)} ms</td>
+                    <td>${report.fps}</td>
+                    <td>
+                        <button class="view-btn" data-id="${report.id}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                    </td>
+                `;
+                
+                reportsTbody.appendChild(row);
+            });
+            
+            // Añadir event listeners a los botones "Ver"
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-id');
+                    openReportModal(id);
+                });
+            });
+        }
+
+        function openReportModal(id) {
+            const report = reportData.find(r => r.id === id);
+            
+            if (!report) {
+                showError('Reporte no encontrado');
+                return;
+            }
+            
+            // Llenar los datos del reporte
+            reportId.textContent = id;
+            reportTimestamp.textContent = formatDate(report.timestamp);
+            reportCarsCount.textContent = report.train_cars_count;
+            reportProcessingTime.textContent = `${report.processing_time.toFixed(2)} ms`;
+            reportFps.textContent = report.fps;
+            
+            // Limpiar contenedor de vagones
+            wagonContainer.innerHTML = '';
+            loadingWagons.style.display = 'block';
+            noWagons.style.display = 'none';
+            
+            // Mostrar el modal
+            reportModal.style.display = 'block';
+            
+            // Cargar los vagones
+            fetchWagons(id);
+        }
+
+        function fetchWagons(reportId) {
+            fetch(`${API_URL}/wagons?reportId=${reportId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error al cargar los vagones');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayWagons(data);
+                })
+                .catch(error => {
+                    showError(error.message);
+                    console.error('Error:', error);
+                    loadingWagons.style.display = 'none';
+                    noWagons.style.display = 'block';
+                });
+        }
+
+        function displayWagons(wagons) {
+            loadingWagons.style.display = 'none';
+            
+            if (wagons.length === 0) {
+                noWagons.style.display = 'block';
+                return;
+            }
+            
+            noWagons.style.display = 'none';
+            
+            wagons.forEach(wagon => {
+                const wagonCard = document.createElement('div');
+                wagonCard.className = 'wagon-card';
+                
+                // Extraer códigos alfanuméricos si existen
+                const codes = wagon.alfanumeric_codes ? wagon.alfanumeric_codes.join(', ') : 'No detectado';
+                
+                wagonCard.innerHTML = `
+                    <img src="data:image/jpeg;base64,${wagon.image}" alt="Vagón" class="wagon-image">
+                    <div class="wagon-details">
+                        <div class="wagon-code">Código: ${codes}</div>
+                        <div>Texto detectado: ${wagon.text_detected || 'No detectado'}</div>
+                        <div class="wagon-info">
+                            <div class="info-item">
+                                <div class="info-value">${wagon.confidence.toFixed(2)}</div>
+                                <div class="info-label">Confianza</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-value">${wagon.position.width}x${wagon.position.height}</div>
+                                <div class="info-label">Dimensiones</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                wagonContainer.appendChild(wagonCard);
+                
+                // Añadir evento de clic a la imagen para mostrarla ampliada
+                const wagonImage = wagonCard.querySelector('.wagon-image');
+                wagonImage.addEventListener('click', () => {
+                    enlargedImage.src = `data:image/jpeg;base64,${wagon.image}`;
+                    imageCaption.innerHTML = `
+                        <strong>Código:</strong> ${codes}<br>
+                        <strong>Texto detectado:</strong> ${wagon.text_detected || 'No detectado'}<br>
+                        <strong>Confianza:</strong> ${wagon.confidence.toFixed(2)}<br>
+                        <strong>Dimensiones:</strong> ${wagon.position.width}x${wagon.position.height}
+                    `;
+                    imageModal.style.display = 'block';
+                });
+            });
+        }
+
+        function updatePagination() {
+            pagination.innerHTML = '';
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pagination.style.display = 'flex';
+            
+            // Botón anterior
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'pagination-btn';
+            prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    fetchReports();
+                }
+            });
+            pagination.appendChild(prevBtn);
+            
+            // Botones de página
+            const maxButtons = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            
+            if (endPage - startPage + 1 < maxButtons) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.addEventListener('click', () => {
+                    if (i !== currentPage) {
+                        currentPage = i;
+                        fetchReports();
+                    }
+                });
+                pagination.appendChild(pageBtn);
+            }
+            
+            // Botón siguiente
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'pagination-btn';
+            nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    fetchReports();
+                }
+            });
+            pagination.appendChild(nextBtn);
+        }
+
+        function updatePageInfo(total) {
+            const start = (currentPage - 1) * pageSize + 1;
+            const end = Math.min(currentPage * pageSize, total);
+            pageInfo.textContent = `Mostrando ${start} - ${end} de ${total} reportes`;
+        }
+
+        function handleSearch() {
+            currentPage = 1;
+            fetchReports();
+        }
+
+        function resetFilters() {
+            dateFrom.value = '';
+            dateTo.value = '';
+            carCount.value = '';
+            currentPage = 1;
+            fetchReports();
+        }
+
+        function showLoading(isLoading) {
+            loadingReports.style.display = isLoading ? 'block' : 'none';
+            reportsTable.style.display = isLoading ? 'none' : 'table';
+            noReports.style.display = 'none';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            
+            // Ocultar el mensaje después de 5 segundos
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        function getBadgeClass(count) {
+            if (count <= 3) return 'badge-success';
+            if (count <= 6) return 'badge-warning';
+            return 'badge-danger';
+        }
+    </script>
+</body>
+</html>
