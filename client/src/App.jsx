@@ -6,31 +6,12 @@ const API_URL = 'http://localhost:8000';
 function App() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisId, setAnalysisId] = useState(null);
   const [results, setResults] = useState(null);
   const [statusMessage, setStatusMessage] = useState('');
   const [error, setError] = useState(null);
-  const [selectedCar, setSelectedCar] = useState(null);
-  const [videoError, setVideoError] = useState(false);
   
-  // Manejar errores en la carga del video
-  const handleVideoError = () => {
-    console.error("Error al cargar el video");
-    setVideoError(true);
-  };
-  
-  // Intentar recargar el video
-  const retryLoadVideo = () => {
-    setVideoError(false);
-    // Forzar recarga del elemento video
-    const videoElement = document.querySelector('.video-player');
-    if (videoElement) {
-      videoElement.load();
-    }
-  };
-
   // Manejar selección de archivo
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -42,9 +23,7 @@ function App() {
       }
       setSelectedFile(file);
       setResults(null);
-      setAnalysisId(null);
       setError(null);
-      setSelectedCar(null);
     }
   };
 
@@ -56,33 +35,18 @@ function App() {
     }
 
     setIsUploading(true);
-    setUploadProgress(0);
-    setStatusMessage('Subiendo video...');
+    setStatusMessage('Subiendo video y analizando...');
     setError(null);
 
     const formData = new FormData();
     formData.append('file', selectedFile);
 
     try {
-      // Simular progreso de carga
-      const uploadTimer = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 95) {
-            clearInterval(uploadTimer);
-            return 95;
-          }
-          return prev + 5;
-        });
-      }, 200);
-
-      // Subir el archivo
+      // Subir el archivo directamente para análisis
       const response = await fetch(`${API_URL}/upload-video/`, {
         method: 'POST',
         body: formData,
       });
-
-      clearInterval(uploadTimer);
-      setUploadProgress(100);
 
       if (!response.ok) {
         throw new Error(`Error al subir el archivo: ${response.status}`);
@@ -91,14 +55,13 @@ function App() {
       const responseText = await response.text();
       // Eliminar comillas si están presentes
       const cleanId = responseText.replace(/^"|"$/g, '');
-      console.log("ID recibido:", responseText);
-      console.log("ID limpio:", cleanId);
       
       setAnalysisId(cleanId);
-
-      // Iniciar análisis
       setIsUploading(false);
-      startAnalysis(cleanId);
+      setIsAnalyzing(true);
+
+      // Verificar el estado del análisis
+      checkAnalysisStatus(cleanId);
     } catch (error) {
       console.error('Error al subir el archivo:', error);
       setIsUploading(false);
@@ -106,38 +69,10 @@ function App() {
     }
   };
 
-  // Iniciar análisis
-  const startAnalysis = async (id) => {
-    setIsAnalyzing(true);
-    setStatusMessage('Analizando video para detectar vagones...');
-
-    try {
-      // Asegurarse de que el ID esté limpio
-      const cleanId = id.replace(/^"|"$/g, '');
-      console.log("Iniciando análisis con ID:", cleanId);
-      
-      // Iniciar análisis
-      const response = await fetch(`${API_URL}/analyze/${cleanId}`);
-      
-      if (!response.ok) {
-        throw new Error(`Error al iniciar el análisis: ${response.status}`);
-      }
-
-      // Verificar estado hasta que esté completado
-      checkAnalysisStatus(cleanId);
-    } catch (error) {
-      console.error('Error al iniciar el análisis:', error);
-      setIsAnalyzing(false);
-      setError('Error al iniciar el análisis: ' + error.message);
-    }
-  };
-
   // Verificar estado del análisis
   const checkAnalysisStatus = async (id) => {
     try {
-      // Asegurarse de que el ID esté limpio
       const cleanId = id.replace(/^"|"$/g, '');
-      console.log("Verificando estado con ID:", cleanId);
       
       const response = await fetch(`${API_URL}/status/${cleanId}`);
       
@@ -146,7 +81,6 @@ function App() {
       }
 
       const data = await response.json();
-      console.log("Estado recibido:", data);
       
       if (data.status === 'completed') {
         // Análisis completado, obtener resultados
@@ -165,9 +99,7 @@ function App() {
   // Obtener resultados
   const getResults = async (id) => {
     try {
-      // Asegurarse de que el ID esté limpio
       const cleanId = id.replace(/^"|"$/g, '');
-      console.log("Obteniendo resultados con ID:", cleanId);
       
       const response = await fetch(`${API_URL}/results/${cleanId}`);
       
@@ -182,6 +114,25 @@ function App() {
       }
 
       const data = await response.json();
+      console.log("Datos recibidos:", data);
+      
+      // Verificar que las imágenes estén presentes en los datos
+      if (data.train_cars && data.train_cars.length > 0) {
+        let missingImages = false;
+        
+        // Comprobar cada vagón para asegurarse de que tiene imagen
+        data.train_cars.forEach((car, index) => {
+          if (!car.image) {
+            console.warn(`Advertencia: El vagón #${index} no tiene imagen`);
+            missingImages = true;
+          }
+        });
+        
+        if (missingImages) {
+          console.warn("Algunas imágenes de vagones no están disponibles");
+        }
+      }
+      
       setResults(data);
       setIsAnalyzing(false);
       setStatusMessage('Análisis completado');
@@ -192,16 +143,54 @@ function App() {
     }
   };
 
-  // Manejar selección de vagón para ver detalles
-  const handleCarSelect = (car) => {
-    setSelectedCar(car === selectedCar ? null : car);
+  // Obtener color según nivel de confianza
+  const getConfidenceColor = (confidence) => {
+    if (confidence >= 0.7) return '#4caf50'; // Verde
+    if (confidence >= 0.5) return '#ff9800'; // Naranja
+    return '#f44336'; // Rojo
+  };
+
+  // Cargar imagen específica si no está presente
+  const loadCarImage = async (car) => {
+    if (car.image) return; // Ya tiene imagen
+    
+    if (!car.image_id) {
+      console.error("Vagón sin ID de imagen");
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${API_URL}/image/${car.image_id}`);
+      if (!response.ok) {
+        throw new Error(`Error al cargar imagen: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Actualizar la imagen en el vagón
+      if (data.image) {
+        const updatedCars = results.train_cars.map(c => {
+          if (c.id === car.id) {
+            return { ...c, image: data.image };
+          }
+          return c;
+        });
+        
+        setResults({
+          ...results,
+          train_cars: updatedCars
+        });
+      }
+    } catch (error) {
+      console.error(`Error al cargar imagen para vagón ${car.id}:`, error);
+    }
   };
 
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>Análisis de Video y Detección de Vagones de Tren</h1>
-        <p>Sube un video de trenes para analizar y contar vagones</p>
+        <h1>Reporte de Detección de Vagones</h1>
+        <p>Sube un video para generar un reporte detallado de vagones (almacenado en MongoDB)</p>
       </header>
 
       <main>
@@ -238,8 +227,8 @@ function App() {
                 <div 
                   className="progress-bar"
                   style={{
-                    width: isUploading ? `${uploadProgress}%` : '100%',
-                    animation: isAnalyzing ? 'pulse 1.5s infinite' : 'none'
+                    width: '100%',
+                    animation: 'pulse 1.5s infinite'
                   }}
                 ></div>
               </div>
@@ -247,166 +236,133 @@ function App() {
           )}
 
           {error && (
-            <div className="error-message">
-              {error}
-            </div>
+            <div className="error-message">{error}</div>
           )}
         </section>
 
         {results && (
           <div className="results-container">
-            <section className="video-info">
-              <h2>Información del Video</h2>
-              <div className="stats-grid">
-                <div className="stat-card">
-                  <h3>Duración</h3>
-                  <p>{results.video_info.duration.toFixed(2)} segundos</p>
+            <section className="report-header">
+              <h2>Reporte de Vagones Detectados</h2>
+              <div className="report-summary">
+                <div className="summary-item">
+                  <span>Total de vagones:</span>
+                  <strong>{results.train_cars_count}</strong>
                 </div>
-                <div className="stat-card">
-                  <h3>Frames</h3>
-                  <p>{results.video_info.frame_count}</p>
+                <div className="summary-item">
+                  <span>Tiempo de procesamiento:</span>
+                  <strong>{results.processing_time.toFixed(2)} segundos</strong>
                 </div>
-                <div className="stat-card">
-                  <h3>Resolución</h3>
-                  <p>{results.video_info.width} x {results.video_info.height}</p>
-                </div>
-                <div className="stat-card highlight-card">
-                  <h3>Vagones Detectados</h3>
-                  <p>{results.train_cars_count}</p>
-                </div>
+                {results.timestamp && (
+                  <div className="summary-item">
+                    <span>Fecha del análisis:</span>
+                    <strong>{results.timestamp}</strong>
+                  </div>
+                )}
               </div>
-              
-              {results.processed_video_available && (
-                <div className="video-section">
-                  <h3>Video Procesado</h3>
-                  <p>Video con las detecciones de vagones marcadas:</p>
-                  
-                  <div className="video-player-container">
-                    {videoError ? (
-                      <div className="video-error">
-                        <p>Error al cargar el video. El video podría no estar listo o hay un problema con el formato.</p>
-                        <button onClick={retryLoadVideo} className="retry-button">
-                          Intentar de nuevo
-                        </button>
-                      </div>
-                    ) : (
-                      <video 
-                        className="video-player"
-                        controls
-                        preload="metadata"
-                        playsInline
-                        onError={handleVideoError}
-                        poster={results.frame_samples.length > 0 ? `data:image/jpeg;base64,${results.frame_samples[0]}` : ''}
-                      >
-                        <source src={`${API_URL}/stream-video/${results.id}`} type="video/mp4" />
-                        Tu navegador no soporta la reproducción de video.
-                      </video>
-                    )}
-                  </div>
-                  
-                  <div className="video-actions">
-                    <a 
-                      href={`${API_URL}/download-video/${results.id}`} 
-                      className="download-button"
-                      download
-                    >
-                      Descargar Video
-                    </a>
-                  </div>
-                </div>
-              )}
             </section>
 
-            <section className="train-cars">
-              <h2>Vagones Detectados</h2>
+            <section className="train-cars-report">
               {results.train_cars_count === 0 ? (
-                <div className="no-objects">
+                <div className="no-cars">
                   <p>No se detectaron vagones en el video.</p>
                 </div>
               ) : (
-                <div className="cars-container">
-                  <div className="cars-grid">
-                    {results.train_cars.map((car) => (
-                      <div 
-                        className={`car-card ${selectedCar && selectedCar.id === car.id ? 'selected' : ''}`}
-                        key={car.id}
-                        onClick={() => handleCarSelect(car)}
-                      >
-                        <div className="car-img-container">
-                          <img
-                            src={`data:image/jpeg;base64,${car.image}`}
-                            alt={`Vagón ${car.id}`}
-                            className="car-thumbnail"
-                          />
-                        </div>
-                        <div className="car-info">
+                <div className="cars-report-grid">
+                  {results.train_cars.map((car) => {
+                    // Intentar cargar imagen si no está presente
+                    if (!car.image && car.image_id) {
+                      loadCarImage(car);
+                    }
+                    
+                    return (
+                      <div className="car-report-card" key={car.id}>
+                        <div className="car-header">
                           <h3>Vagón #{car.id + 1}</h3>
-                          {car.text_detected && (
-                            <p className="car-text">ID: <span className="alfanum-id">{car.text_detected}</span></p>
+                          <div className="confidence-badge" 
+                               style={{backgroundColor: getConfidenceColor(car.confidence)}}>
+                            {(car.confidence * 100).toFixed(0)}%
+                          </div>
+                        </div>
+                        
+                        <div className="car-image-container">
+                          {car.image ? (
+                            <img
+                              src={`data:image/jpeg;base64,${car.image}`}
+                              alt={`Vagón ${car.id}`}
+                              className="car-image"
+                            />
+                          ) : (
+                            <div className="loading-image">
+                              <p>Cargando imagen...</p>
+                            </div>
                           )}
-                          <p className="car-confidence">
-                            Confianza: {(car.confidence * 100).toFixed(2)}%
-                          </p>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {selectedCar && (
-                    <div className="car-details">
-                      <h3>Detalles del Vagón #{selectedCar.id + 1}</h3>
-                      <div className="car-detail-content">
-                        <div className="car-image-large">
-                          <img
-                            src={`data:image/jpeg;base64,${selectedCar.image}`}
-                            alt={`Detalle de vagón ${selectedCar.id}`}
-                          />
-                        </div>
-                        <div className="car-metadata">
-                          <div className="metadata-item">
-                            <span>Identificador alfanumérico:</span>
-                            <strong className="alfanum-id">{selectedCar.text_detected || "No detectado"}</strong>
+                        
+                        <div className="car-details">
+                          {car.class_name && (
+                            <div className="detail-row">
+                              <span>Clase detectada:</span>
+                              <strong>{car.class_name}</strong>
+                            </div>
+                          )}
+                          
+                          {car.text_detected && (
+                            <div className="detail-row">
+                              <span>Texto detectado:</span>
+                              <strong className="alfanum-value">{car.text_detected}</strong>
+                            </div>
+                          )}
+                          
+                          {car.alfanumeric_codes && car.alfanumeric_codes.length > 0 ? (
+                            <div className="detail-row">
+                              <span>Códigos Alfanuméricos:</span>
+                              <div className="codes-list">
+                                {car.alfanumeric_codes.map((code, idx) => (
+                                  <span key={idx} className="code-tag">{code}</span>
+                                ))}
+                              </div>
+                            </div>
+                          ) : (
+                            car.text_detected && (
+                              <div className="detail-row">
+                                <span>Códigos Alfanuméricos:</span>
+                                <span className="no-codes">No se detectaron códigos específicos</span>
+                              </div>
+                            )
+                          )}
+                          
+                          <div className="detail-row">
+                            <span>ID en MongoDB:</span>
+                            <code className="mongo-id">{car.image_id || car._id}</code>
                           </div>
-                          <div className="metadata-item">
-                            <span>Confianza de detección:</span>
-                            <strong>{(selectedCar.confidence * 100).toFixed(2)}%</strong>
-                          </div>
-                          <div className="metadata-item">
-                            <span>Posición en frame:</span>
-                            <strong>X: {selectedCar.position.x}, Y: {selectedCar.position.y}</strong>
-                          </div>
-                          <div className="metadata-item">
+                          
+                          <div className="detail-row">
                             <span>Dimensiones:</span>
-                            <strong>{selectedCar.position.width} x {selectedCar.position.height} px</strong>
+                            <strong>{car.position.width} x {car.position.height} px</strong>
                           </div>
+                          
+                          {car.detected_frame && (
+                            <div className="detail-row">
+                              <span>Frame de detección:</span>
+                              <strong>{car.detected_frame}</strong>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </section>
-
-            <section className="frame-samples">
-              <h2>Frames de Muestra</h2>
-              {results.frame_samples.length === 0 ? (
-                <p>No hay muestras de frames disponibles.</p>
-              ) : (
-                <div className="frames-grid">
-                  {results.frame_samples.map((frame, index) => (
-                    <div className="frame-card" key={index}>
-                      <img
-                        src={`data:image/jpeg;base64,${frame}`}
-                        alt={`Frame ${index + 1}`}
-                      />
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </section>
           </div>
         )}
       </main>
+      
+      <footer className="app-footer">
+        <p>Sistema de Reporte de Vagones con MongoDB</p>
+        <p className="small-text">Las imágenes y datos de los vagones se almacenan en MongoDB</p>
+      </footer>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-/* Estilos generales */
+/* Estilos para la aplicación con MongoDB */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -6,14 +6,10 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f5;
-  color: #333;
+  font-family: 'Segoe UI', 'Roboto', sans-serif;
   line-height: 1.6;
+  color: #333;
+  background-color: #f8f9fa;
 }
 
 .app-container {
@@ -22,432 +18,342 @@ body {
   padding: 20px;
 }
 
+/* Encabezado */
 .app-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #ddd;
 }
 
 .app-header h1 {
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
   color: #2c3e50;
+  margin-bottom: 5px;
 }
 
 .app-header p {
   color: #7f8c8d;
 }
 
-/* Sección de carga de archivos */
+/* Sección de carga */
 .upload-section {
   background-color: white;
   border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  padding: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .file-selection {
-  margin-bottom: 1.5rem;
+  margin-bottom: 15px;
 }
 
 .file-input {
-  display: none;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
 }
 
 .file-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
   align-items: center;
+  gap: 10px;
 }
 
 .file-button {
-  background-color: #3498db;
+  background-color: #4a90e2;
   color: white;
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
   display: inline-block;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s;
 }
 
 .file-button:hover {
-  background-color: #2980b9;
+  background-color: #3a7bc8;
 }
 
 .file-name {
   flex: 1;
-  padding: 10px;
-  background-color: #f9f9f9;
+  padding: 8px;
+  background-color: #f8f9fa;
   border-radius: 4px;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
   border: 1px solid #ddd;
 }
 
 .upload-button {
-  background-color: #27ae60;
+  background-color: #4caf50;
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s;
 }
 
-.upload-button:hover:not(:disabled) {
-  background-color: #219653;
+.upload-button:hover {
+  background-color: #43a047;
 }
 
 .upload-button:disabled {
-  background-color: #95a5a6;
+  background-color: #a5d6a7;
   cursor: not-allowed;
 }
 
 /* Barra de progreso */
 .progress-container {
-  margin-top: 1.5rem;
+  margin-top: 15px;
 }
 
 .progress-bar-container {
-  width: 100%;
-  height: 12px;
-  background-color: #ecf0f1;
-  border-radius: 6px;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin-top: 8px;
   overflow: hidden;
-  margin-top: 0.5rem;
 }
 
 .progress-bar {
   height: 100%;
-  background-color: #3498db;
-  transition: width 0.3s ease;
+  background-color: #4a90e2;
+  border-radius: 4px;
 }
 
 @keyframes pulse {
-  0% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0.6;
-  }
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
 }
 
-/* Mensajes de error */
+/* Mensaje de error */
 .error-message {
-  background-color: #ffecec;
-  color: #e74c3c;
-  padding: 15px;
+  background-color: #ffebee;
+  color: #c62828;
+  padding: 12px;
   border-radius: 4px;
-  margin-top: 1rem;
-  border-left: 4px solid #e74c3c;
+  margin-top: 15px;
+  border-left: 3px solid #c62828;
 }
 
 /* Contenedor de resultados */
 .results-container {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 20px;
 }
 
-.results-container > section {
+/* Encabezado del reporte */
+.report-header {
   background-color: white;
   border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.results-container h2 {
+.report-header h2 {
+  margin-bottom: 15px;
   color: #2c3e50;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #ecf0f1;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
 }
 
-/* Información del video */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+.report-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-/* Video procesado */
-.video-section {
-  background-color: #f0f9ff;
-  padding: 1.5rem;
-  border-radius: 8px;
-  border-left: 4px solid #3498db;
-  margin-top: 2rem;
-}
-
-.video-section h3 {
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
-}
-
-.video-section p {
-  margin-bottom: 1rem;
-}
-
-.video-player-container {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  background-color: #000;
-  margin-bottom: 1.5rem;
-}
-
-.video-player {
-  width: 100%;
-  display: block;
-  max-height: 600px;
-}
-
-.video-error {
-  padding: 2rem;
-  background-color: #f8d7da;
-  color: #721c24;
-  text-align: center;
+.summary-item {
+  padding: 10px 15px;
+  background-color: #f1f8e9;
   border-radius: 4px;
-  min-height: 200px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+}
+
+.summary-item span {
+  font-size: 0.9em;
+  color: #689f38;
+}
+
+.summary-item strong {
+  font-size: 1.3em;
+  color: #33691e;
+}
+
+/* Reporte de vagones */
+.train-cars-report {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.no-cars {
+  text-align: center;
+  padding: 30px;
+  color: #757575;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.cars-report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.car-report-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.car-report-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.car-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  padding: 12px 15px;
+  background-color: #f5f7fa;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.retry-button {
-  margin-top: 1rem;
-  background-color: #dc3545;
+.car-header h3 {
+  font-size: 1.1em;
+  color: #37474f;
+  margin: 0;
+}
+
+.confidence-badge {
+  padding: 3px 8px;
+  border-radius: 12px;
   color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  font-size: 0.8em;
+  font-weight: bold;
 }
 
-.retry-button:hover {
-  background-color: #c82333;
-}
-
-.video-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-}
-
-.download-button {
-  display: inline-block;
-  background-color: #3498db;
-  color: white;
-  text-decoration: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  font-weight: 500;
-  transition: background-color 0.3s;
-}
-
-.download-button:hover {
-  background-color: #2980b9;
-}
-
-.stat-card {
-  padding: 1rem;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  text-align: center;
-  transition: transform 0.2s;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.highlight-card {
-  background-color: #e3f2fd;
-  border-left: 4px solid #2196f3;
-}
-
-.stat-card h3 {
-  color: #7f8c8d;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.stat-card p {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-/* Vagones detectados */
-.cars-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.cars-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.5rem;
-}
-
-.car-card {
-  background-color: white;
-  border-radius: 8px;
+.car-image-container {
+  height: 200px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #000;
 }
 
-.car-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
-}
-
-.car-card.selected {
-  border-color: #3498db;
-  background-color: #f0f8ff;
-}
-
-.car-img-container {
-  width: 100%;
-  height: 150px;
-  overflow: hidden;
-  position: relative;
-}
-
-.car-thumbnail {
+.car-image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-}
-
-.car-card:hover .car-thumbnail {
-  transform: scale(1.05);
-}
-
-.car-info {
-  padding: 1rem;
-}
-
-.car-info h3 {
-  margin-bottom: 0.5rem;
-  color: #2c3e50;
-  font-size: 1.1rem;
-}
-
-.car-text {
-  font-weight: 500;
-  color: #3498db;
-  margin-bottom: 0.5rem;
-}
-
-.car-confidence {
-  font-size: 0.9rem;
-  color: #7f8c8d;
+  object-fit: contain;
 }
 
 .car-details {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-top: 1rem;
-  border: 1px solid #e1e1e1;
-}
-
-.car-details h3 {
-  color: #2c3e50;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e1e1e1;
-}
-
-.car-detail-content {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
-
-.car-image-large {
-  flex: 0 0 300px;
-  max-width: 100%;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-}
-
-.car-image-large img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.car-metadata {
-  flex: 1;
-  min-width: 250px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 10px;
 }
 
-.metadata-item {
+.detail-row {
   display: flex;
-  justify-content: space-between;
-  padding: 0.5rem;
-  background-color: white;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.detail-row span {
+  font-size: 0.85em;
+  color: #757575;
+}
+
+.detail-row strong {
+  color: #37474f;
+}
+
+.alfanum-value {
+  font-family: monospace;
+  padding: 4px 8px;
+  background-color: #e3f2fd;
   border-radius: 4px;
-  border-left: 3px solid #3498db;
+  font-size: 1.1em;
+  display: inline-block;
 }
 
-.metadata-item span {
-  color: #7f8c8d;
+.codes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
 }
 
-.metadata-item strong {
-  color: #2c3e50;
+.code-tag {
+  background-color: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  color: #2e7d32;
+  font-family: monospace;
 }
 
-/* Frames de muestra */
-.frames-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+.no-codes {
+  font-style: italic;
+  color: #9e9e9e;
+  font-size: 0.9em;
 }
 
-.frame-card {
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
+.mongo-id {
+  font-family: monospace;
+  font-size: 0.9em;
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: #607d8b;
+  word-break: break-all;
 }
 
-.frame-card:hover {
-  transform: scale(1.02);
+/* Footer */
+.app-footer {
+  margin-top: 30px;
+  text-align: center;
+  padding: A15px 0;
+  color: #9e9e9e;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.9em;
 }
 
-.frame-card img {
-  width: 100%;
-  height: auto;
-  display: block;
+.small-text {
+  font-size: 0.8em;
+  margin-top: 5px;
+  color: #bdbdbd;
 }
 
-/* Responsive design */
+/* Responsive */
 @media (max-width: 768px) {
+  .app-container {
+    padding: 10px;
+  }
+  
+  .cars-report-grid {
+    grid-template-columns: 1fr;
+  }
+  
   .file-controls {
     flex-direction: column;
     align-items: stretch;
@@ -458,15 +364,7 @@ body {
     text-align: center;
   }
   
-  .car-detail-content {
+  .report-summary {
     flex-direction: column;
-  }
-  
-  .stats-grid, .frames-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .cars-grid {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
 }
